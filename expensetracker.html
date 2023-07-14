@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Expense Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            width: 300px;
+            margin: 0 auto;
+        }
+
+        input[type="text"], input[type="number"], input[type="submit"] {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+
+        table {
+            width: 500px;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        td:first-child {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Expense Tracker</h1>
+
+    <form id="expense-form">
+        <input type="date" name="date" placeholder="Date" required>
+        <input type="text" name="category" placeholder="Category" required>
+        <input type="number" name="amount" placeholder="Amount" step="0.01" required>
+        <input type="submit" value="Add Expense">
+    </form>
+
+    <table id="expense-table">
+        <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Amount</th>
+        </tr>
+    </table>
+
+    <script>
+        // Function to fetch and display expenses from the server
+        function displayExpenses() {
+            fetch('/expenses')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('expense-table').getElementsByTagName('tbody')[0];
+                    tableBody.innerHTML = '';
+                    data.forEach(expense => {
+                        const row = tableBody.insertRow();
+                        row.innerHTML = `
+                            <td>${expense.date}</td>
+                            <td>${expense.category}</td>
+                            <td>${expense.amount}</td>
+                        `;
+                    });
+                });
+        }
+
+        // Function to handle form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch('/expenses', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        form.reset();
+                        displayExpenses();
+                    }
+                });
+        }
+
+        // Attach event listener to form submission
+        const expenseForm = document.getElementById('expense-form');
+        expenseForm.addEventListener('submit', handleSubmit);
+
+        // Display expenses on page load
+        displayExpenses();
+    </script>
+</body>
+</html>
